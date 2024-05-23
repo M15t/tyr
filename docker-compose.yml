@@ -1,0 +1,23 @@
+version: "3"
+services:
+  db:
+    build:
+      context: ./docker/db
+      # change to `Dockerfile.postgis` when working with location data
+      dockerfile: Dockerfile.postgres
+    container_name: tyr-postgresql-db
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-maindb}
+      # Superuser creds, should be used by DBA only
+      # Application users are created in provision script
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: UTC
+      PGTZ: UTC
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
