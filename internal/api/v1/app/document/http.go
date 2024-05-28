@@ -31,9 +31,9 @@ type Service interface {
 func NewHTTP(svc Service, eg *echo.Group) {
 	h := HTTP{svc: svc}
 
-	// swagger:operation POST /v1/app/documents/analyze app-documents-analyze appDocumentAnalyze
+	// swagger:operation POST /v1/app/documents/analyze/upload app-documents-analyze appDocumentAnalyzeUpload
 	// ---
-	// summary: Analyzes new document, send content of file to Azure to process
+	// summary: Analyzes new document, upload and send file to Azure for processing
 	// consumes:
 	// - multipart/form-data
 	// parameters:
@@ -50,9 +50,9 @@ func NewHTTP(svc Service, eg *echo.Group) {
 	//     description: 'Possible errors: 400, 401, 403, 500'
 	//     schema:
 	//       "$ref": "#/definitions/ErrorResponse"
-	eg.POST("/analyze", h.analyze)
+	eg.POST("/analyze/upload", h.analyzeUpload)
 
-	// swagger:operation GET /v1/app/documents/analyze/get/{id} app-documents-analyze appDocumentGet
+	// swagger:operation GET /v1/app/documents/analyze/get/{id} app-documents-analyze appDocumentAnalyzeGet
 	// ---
 	// summary: Get document from Azure by apim_request_id and analyze the result
 	// parameters:
@@ -70,7 +70,7 @@ func NewHTTP(svc Service, eg *echo.Group) {
 	//     description: 'Possible errors: 400, 401, 403, 500'
 	//     schema:
 	//       "$ref": "#/definitions/ErrorResponse"
-	eg.GET("/analyze/get/:id", h.getAnalyze)
+	eg.GET("/analyze/get/:id", h.analyzeGet)
 
 	// swagger:operation GET /v1/app/documents/{id} app-documents documentsRead
 	// ---
@@ -151,7 +151,7 @@ func NewHTTP(svc Service, eg *echo.Group) {
 	eg.DELETE("/:id", h.delete)
 }
 
-func (h *HTTP) analyze(c echo.Context) error {
+func (h *HTTP) analyzeUpload(c echo.Context) error {
 	r := AnalyzeDocumentReq{}
 	if err := c.Bind(&r); err != nil {
 		return err
@@ -177,7 +177,7 @@ func (h *HTTP) analyze(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func (h *HTTP) getAnalyze(c echo.Context) error {
+func (h *HTTP) analyzeGet(c echo.Context) error {
 	id := c.Param("id")
 
 	resp, err := h.svc.Get(contextutil.NewContext(c), id)
